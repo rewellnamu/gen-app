@@ -1,0 +1,233 @@
+import React, { useEffect, useState, useContext } from 'react';
+import {
+  View,
+  TextInput,
+  Button,
+  FlatList,
+  Image,
+  Text,
+  StyleSheet,
+} from 'react-native';
+import { AuthContext } from '../context/AuthContext';
+import API, { setAuthToken } from '../services/api';
+import io from 'socket.io-client';
+import * as ImagePicker from 'expo-image-picker';
+
+const socket = io('http://192.168.56.1:5000'); // 🔁 Replace with your local IP if different
+
+const ChatScreen = ({ route }) => {
+  const { user, token } = useContext(AuthContext);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [receiverData, setReceiverData] = useState(null);
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
+  const receiver = route.params.user;
+
+  useEffect(() => {
+    setAuthToken(token);
+
+    socket.emit('userOnline', user._id);
+
+    socket.on('receiveMessage', (msg) => {
+      if (msg.sender._id === receiver._id || msg.receiver === receiver._id) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    });
+
+    socket.on('onlineUsers', (ids) => setOnlineUserIds(ids));
+
+    fetchMessages();
+    fetchReceiver();
+
+    return () => socket.disconnect();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const res = await API.get(`/chat/messages/${receiver._id}`);
+      setMessages(res.data);
+    } catch (err) {
+      console.error('Error fetching messages', err);
+    }
+  };
+
+  const fetchReceiver = async () => {
+    try {
+      const res = await API.get(`/auth/user/${receiver._id}`);
+      setReceiverData(res.data);
+    } catch (err) {
+      console.error('Error fetching user data', err);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!text.trim()) return;
+    try {
+      const res = await API.post('/chat/send', {
+        receiver: receiver._id,
+        text,
+      });
+      socket.emit('sendMessage', res.data);
+      setMessages((prev) => [...prev, res.data]);
+      setText('');
+    } catch (err) {
+      console.error('Error sending message', err);
+    }
+  };
+
+  const sendImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({ base64: false });
+
+    if (!result.cancelled) {
+      const form = new FormData();
+      form.append('receiver', receiver._id);
+      form.append('image', {
+        uri: result.uri,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      });
+
+      try {
+        const res = await API.post('/chat/send', form, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        socket.emit('sendMessage', res.data);
+        setMessages((prev) => [...prev, res.data]);
+      } catch (err) {
+        console.error('Image send error', err);
+      }
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    const isSelf = item.sender._id === user._id;
+
+    return (
+      <View style={[styles.row, isSelf ? styles.selfRow : styles.otherRow]}>
+        {!isSelf && (
+          <Image
+            source={{
+              uri: `http://192.168.56.1:5000${item.sender.avatar || ''}`,
+            }}
+            style={styles.avatar}
+          />
+        )}
+        <View style={[styles.bubble, isSelf ? styles.self : styles.other]}>
+          {item.text ? <Text>{item.text}</Text> : null}
+          {item.image && (
+            <Image
+              source={{ uri: `http://192.168.56.1:5000${item.image}` }}
+              style={styles.image}
+            />
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* Header Info */}
+      {receiverData && (
+        <View style={styles.header}>
+          <Text style={styles.username}>{receiverData.username}</Text>
+          <Text style={styles.status}>
+            {onlineUserIds.includes(receiver._id)
+              ? 'Online'
+              : `Last seen: ${new Date(receiverData.lastSeen).toLocaleString()}`}
+          </Text>
+        </View>
+      )}
+
+      {/* Messages */}
+      <FlatList
+        data={messages}
+        keyExtractor={(_, i) => i.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{ padding: 10 }}
+      />
+
+      {/* Input Area */}
+      <View style={styles.inputArea}>
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          placeholder="Type message..."
+          style={styles.input}
+        />
+        <Button title="📷" onPress={sendImage} />
+        <Button title="Send" onPress={sendMessage} />
+      </View>
+    </View>
+  );
+};
+
+export default ChatScreen;
+
+const styles = StyleSheet.create({
+  header: {
+    padding: 10,
+    backgroundColor: '#f1f1f1',
+  },
+  username: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  status: {
+    color: 'gray',
+    fontSize: 12,
+  },
+  inputArea: {
+    flexDirection: 'row',
+    padding: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginRight: 5,
+    borderRadius: 5,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginVertical: 5,
+  },
+  selfRow: {
+    justifyContent: 'flex-end',
+  },
+  otherRow: {
+    justifyContent: 'flex-start',
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 6,
+  },
+  bubble: {
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '70%',
+  },
+  self: {
+    backgroundColor: '#DCF8C5',
+    alignSelf: 'flex-end',
+  },
+  other: {
+    backgroundColor: '#EEE',
+    alignSelf: 'flex-start',
+  },
+  image: {
+    width: 150,
+    height: 150,
+    marginTop: 5,
+  },
+});

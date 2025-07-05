@@ -1,0 +1,15 @@
+import axios from 'axios';
+
+const API = axios.create({
+  baseURL: 'http://192.168.56.1:5000/api',
+});
+
+export const setAuthToken = (token) => {
+  if (token) {
+    API.defaults.headers.common['Authorization'] = token;
+  } else {
+    delete API.defaults.headers.common['Authorization'];
+  }
+};
+
+export default API;
