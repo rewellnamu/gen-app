@@ -13,7 +13,7 @@ import API, { setAuthToken } from '../services/api';
 import io from 'socket.io-client';
 import * as ImagePicker from 'expo-image-picker';
 
-const socket = io('http://192.168.56.1:5000'); // 🔁 Replace with your local IP if different
+const socket = io('http://192.168.100.79:5000'); // 🔁 Replace with your local IP if different
 
 const ChatScreen = ({ route }) => {
   const { user, token } = useContext(AuthContext);
@@ -76,31 +76,41 @@ const ChatScreen = ({ route }) => {
   };
 
   const sendImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({ base64: false });
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 1,
+  });
 
-    if (!result.cancelled) {
-      const form = new FormData();
-      form.append('receiver', receiver._id);
-      form.append('image', {
-        uri: result.uri,
-        name: 'photo.jpg',
-        type: 'image/jpeg',
+  if (!result.cancelled) {
+    const localUri = result.assets[0]?.uri || result.uri;
+    const filename = localUri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : `image`;
+
+    const form = new FormData();
+    form.append('receiver', receiver._id);
+    form.append('image', {
+      uri: localUri,
+      name: filename,
+      type,
+    });
+
+    try {
+      const res = await API.post('/chat/send', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      try {
-        const res = await API.post('/chat/send', form, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        socket.emit('sendMessage', res.data);
-        setMessages((prev) => [...prev, res.data]);
-      } catch (err) {
-        console.error('Image send error', err);
-      }
+      console.log('Image message sent:', res.data); // ✅ Debug
+      socket.emit('sendMessage', res.data);
+      setMessages((prev) => [...prev, res.data]);
+    } catch (err) {
+      console.error('Image send error', err.response?.data || err.message);
     }
-  };
+  }
+};
+
 
   const renderItem = ({ item }) => {
     const isSelf = item.sender._id === user._id;
@@ -110,7 +120,7 @@ const ChatScreen = ({ route }) => {
         {!isSelf && (
           <Image
             source={{
-              uri: `http://192.168.56.1:5000${item.sender.avatar || ''}`,
+              uri: `http://192.168.100.79:5000${item.sender.avatar || ''}`,
             }}
             style={styles.avatar}
           />
@@ -119,7 +129,7 @@ const ChatScreen = ({ route }) => {
           {item.text ? <Text>{item.text}</Text> : null}
           {item.image && (
             <Image
-              source={{ uri: `http://192.168.56.1:5000${item.image}` }}
+              source={{ uri: `http://192.168.100.79:5000${item.image}` }}
               style={styles.image}
             />
           )}

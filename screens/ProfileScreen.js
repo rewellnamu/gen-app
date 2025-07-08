@@ -62,7 +62,7 @@ const ProfileScreen = () => {
         <Image
           source={
             avatar
-              ? { uri: avatar.startsWith('http') ? `http://192.168.56.1:5000${avatar}` : avatar }
+              ? { uri: avatar.startsWith('http') ? `http://192.168.100.79:5000${avatar}` : avatar }
               : require('../assets/default-avatar.png') // fallback
           }
           style={styles.avatar}

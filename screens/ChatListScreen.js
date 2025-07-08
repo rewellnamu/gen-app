@@ -3,8 +3,9 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import API, { setAuthToken } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import io from 'socket.io-client';
+import moment from 'moment'; // ✅ For timestamp formatting
 
-const socket = io('http://192.168.56.1:5000'); // replace with your local IP
+const socket = io('http://192.168.100.79:5000'); // replace with your local IP
 
 const ChatListScreen = ({ navigation }) => {
   const { user, token } = useContext(AuthContext);
@@ -38,7 +39,7 @@ const ChatListScreen = ({ navigation }) => {
     return (
       <TouchableOpacity onPress={() => navigation.navigate('Chat', { user: item })}>
         <Text style={{ padding: 10, fontSize: 16 }}>
-          {isOnline ? '🟢' : '⚫'} {item.username}
+          {isOnline ? '🟢' : '🩸'} {item.username}
         </Text>
 
       </TouchableOpacity>
