@@ -12,17 +12,37 @@ const ChatListScreen = ({ navigation }) => {
   const [users, setUsers] = useState([]);
   const [onlineUserIds, setOnlineUserIds] = useState([]);
 
+  // useEffect(() => {
+  //   setAuthToken(token);
+  //   fetchUsers();
+
+  //   socket.emit('userOnline', user._id);
+  //   socket.on('onlineUsers', (onlineIds) => {
+  //     setOnlineUserIds(onlineIds);
+  //   });
+
+  //   return () => socket.disconnect();
+  // }, []);
   useEffect(() => {
-    setAuthToken(token);
-    fetchUsers();
+  console.log('User:', user);
+  console.log('Token:', token);
 
-    socket.emit('userOnline', user._id);
-    socket.on('onlineUsers', (onlineIds) => {
-      setOnlineUserIds(onlineIds);
-    });
+  if (!user || !token) {
+    console.warn('User or token is missing. Cannot fetch users.');
+    return;
+  }
 
-    return () => socket.disconnect();
-  }, []);
+  setAuthToken(token);
+  fetchUsers();
+
+  socket.emit('userOnline', user._id);
+  socket.on('onlineUsers', (onlineIds) => {
+    setOnlineUserIds(onlineIds);
+  });
+
+  return () => socket.disconnect();
+}, []);
+
 
   const fetchUsers = async () => {
     try {
@@ -47,10 +67,22 @@ const ChatListScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 18 }}>Chats</Text>
-      
-      <FlatList
+    <View style={{ padding: 20, marginLeft: 100}}>
+      <Text style={{ fontSize: 30, color: 'blue', fontWeight: 'bold' }}>Chats</Text>
+      <Text style={{ fontSize: 14, color: 'gray' }}>
+        {moment().format('MMMM Do YYYY, h:mm:ss a')}
+      </Text>
+      <Text style={{ fontSize: 20, color: 'blue' }}>
+        {onlineUserIds.length} users online
+      </Text>
+      <Text style={{ fontSize: 20, color: 'blue' }}>
+        {users.length} users found
+      </Text>
+      <Text style={{ fontSize: 14, color: 'gray' }}>
+        Last updated: {moment().format('MMMM Do YYYY, h:mm:ss a')}
+      </Text>
+
+      <FlatList style={{ marginTop: 50, backgroundColor: 'yellow' }}
         data={users}
         keyExtractor={item => item._id}
         renderItem={renderItem}
@@ -58,5 +90,7 @@ const ChatListScreen = ({ navigation }) => {
     </View>
   );
 };
+
+
 
 export default ChatListScreen;
