@@ -19,6 +19,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'blue', marginBottom: 50 }}>mbokaChats</Text>
       <Text>Login</Text>
       <TextInput placeholder="Username" style={styles.input}
         onChangeText={val => setForm({ ...form, username: val })} />
@@ -33,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  input: { borderWidth: 1, marginVertical: 10, padding: 10 },
-  link: { color: 'blue', marginTop: 10 }
+  container: { padding: 20, flex: 1, justifyContent: 'center', alignItems: 'center', backgroundImage: 'linear-gradient(to bottom,rgb(243, 241, 241),rgb(57, 71, 146))' },
+  input: { borderWidth: 1, marginVertical: 10, padding: 10, borderRadius: 5 },
+  link: { color: 'blue', marginTop: 10, fontSize: 20 }
 });

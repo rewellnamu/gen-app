@@ -58,8 +58,8 @@ const ChatListScreen = ({ navigation }) => {
     const isOnline = onlineUserIds.includes(item._id);
     return (
       <TouchableOpacity onPress={() => navigation.navigate('Chat', { user: item })}>
-        <Text style={{ padding: 10, fontSize: 16 }}>
-          {isOnline ? '🟢' : '🩸'} {item.username}
+        <Text style={{ padding: 10, fontSize: 18, color: isOnline ? 'green' : 'red', fontFamily: 'Arial', fontWeight: 'bold' }}>
+          {isOnline ? '🟢' : 'offline - '} {item.username}
         </Text>
 
       </TouchableOpacity>
@@ -67,8 +67,8 @@ const ChatListScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ padding: 20, marginLeft: 100}}>
-      <Text style={{ fontSize: 30, color: 'blue', fontWeight: 'bold' }}>Chats</Text>
+    <View style={{ padding: 20, flex: 1, backgroundImage: 'linear-gradient(to bottom,rgb(243, 241, 241),rgb(57, 71, 146))', display: 'flex', alignItems: 'center' }}>
+      <Text style={{ fontSize: 30, color: 'blue', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>mbokaChats</Text>
       <Text style={{ fontSize: 14, color: 'gray' }}>
         {moment().format('MMMM Do YYYY, h:mm:ss a')}
       </Text>
@@ -82,7 +82,7 @@ const ChatListScreen = ({ navigation }) => {
         Last updated: {moment().format('MMMM Do YYYY, h:mm:ss a')}
       </Text>
 
-      <FlatList style={{ marginTop: 50, backgroundColor: 'yellow' }}
+      <FlatList style={{ marginTop: 50, backgroundColor: 'lightgray', padding: 10, width: '50%', display: 'flex', alignSelf: 'center',}}
         data={users}
         keyExtractor={item => item._id}
         renderItem={renderItem}

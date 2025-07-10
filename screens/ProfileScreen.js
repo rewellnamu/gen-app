@@ -94,8 +94,8 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, alignItems: 'center' },
+  container: { flex: 1, padding: 20, alignItems: 'center',  backgroundImage: 'linear-gradient(to bottom,rgb(243, 239, 239),rgb(73, 74, 165))' },
   avatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 10 },
   changeText: { fontSize: 14, color: 'blue', marginBottom: 20 },
-  input: { width: '100%', borderWidth: 1, marginVertical: 10, padding: 10, borderRadius: 5 },
+  input: { width: '50%', borderWidth: 1, marginVertical: 10, padding: 10, borderRadius: 5 },
 });

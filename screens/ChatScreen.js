@@ -153,7 +153,7 @@ const ChatScreen = ({ route }) => {
       )}
 
       {/* Messages */}
-      <FlatList
+      <FlatList style={{ flex: 1, backgroundImage: 'linear-gradient(to bottom,rgb(243, 241, 241),rgb(57, 71, 146))'  }}
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
@@ -180,30 +180,42 @@ export default ChatScreen;
 const styles = StyleSheet.create({
   header: {
     padding: 10,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: 'blue',
+    alignItems: 'center',
+    
+    width: '50%',
+    alignSelf: 'center',
+
   },
   username: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
   },
   status: {
-    color: 'gray',
+    color: 'white',
     fontSize: 12,
   },
   inputArea: {
+    display: 'flex',
     flexDirection: 'row',
     padding: 10,
     alignItems: 'center',
+    alignSelf: 'center',
     borderTopWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'yellow',
+    backgroundColor: 'lightgray',
+    gap: 10,
+    width: '50%',
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'white',
     padding: 8,
     marginRight: 5,
     borderRadius: 5,
+    backgroundColor: 'white',
+    
   },
   row: {
     flexDirection: 'row',
@@ -228,11 +240,11 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
   },
   self: {
-    backgroundColor: '#DCF8C5',
+    backgroundColor: 'yellow',
     alignSelf: 'flex-end',
   },
   other: {
-    backgroundColor: '#EEE',
+    backgroundColor: 'yellow',
     alignSelf: 'flex-start',
   },
   image: {
